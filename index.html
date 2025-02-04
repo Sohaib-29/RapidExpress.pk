@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapidex - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1574169208507-84376144848b?w=1600') no-repeat center center/cover;
+            font-family: 'Poppins', sans-serif;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 350px;
+        }
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        h2 {
+            color: #1e3c72;
+            font-weight: bold;
+        }
+        .input-group {
+            position: relative;
+            margin: 15px 0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #1e3c72;
+            box-shadow: 0 0 8px rgba(30, 60, 114, 0.5);
+        }
+        .input-group .icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+        .login-btn {
+            background: #1e3c72;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-btn:hover {
+            background: #2a5298;
+        }
+        .login-btn:disabled {
+            background: #4a5568;
+            cursor: not-allowed;
+        }
+        .forgot-password {
+            display: block;
+            margin-top: 10px;
+            color: #1e3c72;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 300px;
+            z-index: 1000;
+        }
+        .popup img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .popup button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .message {
+            display: none;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fa-spin {
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-container">
+            <img src="https://www.rapidexpress.pk/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.5281c210.png&w=256&q=75" alt="Rapidex Logo">
+        </div>
+        <h2>Welcome to Rapidex</h2>
+        <div id="message" class="message"></div>
+        <form id="login-form">
+            <div class="input-group">
+                <input type="text" id="username" required placeholder="Username">
+                <i class="fas fa-user icon"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" required placeholder="Password">
+                <i class="fas fa-lock icon"></i>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+        <a href="#" class="forgot-password" onclick="showPopup()">Forgot Password?</a>
+    </div>
+    <div class="popup" id="popup">
+        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Forgot Password">
+        <p>Hey! Passwords are essential and provided by Rapidex. To maintain customer security, kindly contact us at +92 3394292008.</p>
+        <button onclick="closePopup()">OK</button>
+    </div>
+    <script>
+        function showPopup() {
+            document.getElementById('popup').style.display = 'block';
+        }
+        
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            const loginBtn = document.querySelector('.login-btn');
+            
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbwyy_UCbiPv7s0VvafrATQBtTpTExJKNRD6Hwf21yyqOcf1ppcCe8jXWWdjJRFiLLk/exec', {
+                    method: 'POST',
+                    body: new URLSearchParams({ username, password })
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                messageDiv.style.display = 'block';
+                messageDiv.className = data.success ? 'message success' : 'message error';
+
+                if (data.success && data.data) {
+                    messageDiv.innerText = "Login successful! Redirecting...";
+                    
+                    localStorage.setItem('clientName', data.data.clientName);
+                    localStorage.setItem('username', username);
+
+                    setTimeout(() => {
+                        try {
+                            console.log('Redirecting to dashboard.html...');
+                            window.location.replace('dashboard.html');
+                        } catch (error) {
+                            console.error('Redirect error:', error);
+                            window.open('dashboard.html', '_self');
+                        }
+                    }, 2000);
+                } else {
+                    messageDiv.innerText = data.message || "Incorrect username or password";
+                    setTimeout(() => {
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = 'Login';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.innerText = 'An error occurred. Please try again.';
+                messageDiv.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Login';
+            }
+        });
+    </script>
+</body>
+</html>

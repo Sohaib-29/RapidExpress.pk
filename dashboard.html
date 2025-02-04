@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1574169208507-84376144848b?w=1600') no-repeat center center/cover;
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 95%;
+            max-width: 600px;
+            text-align: center;
+            overflow-y: auto;
+            max-height: 85vh;
+        }
+
+        .welcome-message {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .filter-container select {
+            width: 180px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .filter-container input {
+            flex-grow: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-button {
+            width: 50px;
+            height: 25px;
+            background: #d9534f;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-button::before {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 1.5px;
+            left: 2px;
+            transition: 0.3s;
+        }
+
+        .toggle-button.active {
+            background: #5cb85c;
+        }
+
+        .toggle-button.active::before {
+            left: 26px;
+        }
+
+        .shipment-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .shipment-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 280px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .shipment-card:hover {
+            transform: scale(1.05);
+        }
+
+        .shipment-card b {
+            color: #1e3c72;
+        }
+
+        .status {
+            font-weight: bold;
+            padding: 7px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .modal-logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .modal-message {
+            margin: 20px 0;
+            color: #1e3c72;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h3 class="welcome-message">Welcome, <span id="clientName">Client</span>!</h3>
+        <h2 class="mb-3">Shipment Dashboard</h2>
+        <div class="filter-container">
+            <select id="filterType" class="form-select">
+                <option value="ref">Ref. Number</option>
+                <option value="country">Country</option>
+                <option value="receiver">Receiver</option>
+                <option value="rider">Added By</option>
+            </select>
+            <input type="text" id="filterInput" class="form-control" placeholder="Search...">
+        </div>
+        <div class="toggle-container">
+            <span>Pending</span>
+            <div id="statusToggle" class="toggle-button"></div>
+            <span>Completed</span>
+        </div>
+        <div class="shipment-list" id="shipments">
+            <!-- Shipments will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="completedModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img src="data:image/jpeg;base64,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A" alt="Rapidex Logo" class="modal-logo">
+            <div class="modal-message">
+                <h4>Delivery Details Were Added Successfully!</h4>
+                <p>Everything is set up and we're ready to deliver your parcel.</p>
+                <p><strong>Rapidex - Just Get Set Delivered</strong></p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let allShipments = [];
+    let showCompleted = false;
+
+    // Function to format date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    // Check if user is logged in
+    window.onload = function() {
+        const clientName = localStorage.getItem('clientName');
+        if (!clientName) {
+            window.location.href = 'index.html'; // Redirect to login if not logged in
+            return;
+        }
+        document.getElementById('clientName').textContent = clientName;
+        fetchShipments();
+    };
+
+    document.getElementById("statusToggle").addEventListener("click", function() {
+        this.classList.toggle("active");
+        showCompleted = this.classList.contains("active");
+        filterShipments();
+    });
+
+    // Modal functionality
+    const modal = document.getElementById("completedModal");
+    const closeModal = document.querySelector(".close-modal");
+
+    closeModal.addEventListener("click", function() {
+        modal.classList.remove("show");
+    });
+
+    window.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            modal.classList.remove("show");
+        }
+    });
+
+    async function fetchShipments() {
+        const clientName = localStorage.getItem('clientName');
+        const apiUrl = `https://script.google.com/macros/s/AKfycbyF5G0nCinURGL9pVi2ktKDR6mdAkWEK45HIunx6gHvu9umZgE82yGENDGLeQyqzG1i/exec?client=${encodeURIComponent(clientName)}`;
+
+        try {
+            let response = await fetch(apiUrl);
+            let dataChunks = await response.json();
+            allShipments = dataChunks.flat();
+            filterShipments();
+        } catch (error) {
+            console.error("Error fetching shipment data:", error);
+        }
+    }
+
+    function filterShipments() {
+        const filterType = document.getElementById("filterType").value;
+        const filterInput = document.getElementById("filterInput").value.toLowerCase();
+        
+        let filteredShipments = allShipments.filter(shipment => {
+            return shipment[filterType].toString().toLowerCase().includes(filterInput) &&
+                (showCompleted ? shipment.status === "Completed" : shipment.status === "Pending");
+        });
+        
+        displayShipments(filteredShipments);
+    }
+
+    function displayShipments(shipments) {
+        const shipmentsContainer = document.getElementById('shipments');
+        shipmentsContainer.innerHTML = "";
+
+        shipments.forEach(shipment => {
+            const card = document.createElement('div');
+            card.classList.add('shipment-card');
+            card.innerHTML = `
+                <b>Shipment# ${shipment.ref}</b><br>
+                Date: ${formatDate(shipment.date)} <br>
+                Added By: ${shipment.rider} <br>
+                <b>Receiver:</b> ${shipment.receiver} <br>
+                No. of Boxes: <b>${shipment.boxes}</b> <br>
+                Country: <b>${shipment.country}</b> <br>
+                <span class="status ${shipment.status === 'Completed' ? 'completed' : 'pending'}">${shipment.status}</span>
+            `;
+            
+            card.addEventListener('click', () => {
+                if (shipment.status === 'Completed') {
+                    modal.classList.add("show");
+                } else {
+                    const url = `receiver_form.html?ref=${encodeURIComponent(shipment.ref)}&receiver=${encodeURIComponent(shipment.receiver)}&country=${encodeURIComponent(shipment.country)}`;
+                    window.location.href = url;
+                }
+            });
+            
+            shipmentsContainer.appendChild(card);
+        });
+    }
+
+    // Add event listeners for filtering
+    document.getElementById("filterInput").addEventListener("input", filterShipments);
+    document.getElementById("filterType").addEventListener("change", filterShipments);
+</script>
+</body>
+</html>
